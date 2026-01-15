@@ -1,0 +1,140 @@
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: var(--primary-purple);
+}
+
+.header {
+    margin-bottom: 24px;
+}
+
+.welcomeText {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.userName {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* The Main Gradient Card */
+.netWorthCard {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-purple-dark) 100%);
+    border-radius: 24px;
+    padding: 30px;
+    color: white;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.netWorthCard::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.netWorthLabel {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+}
+
+.netWorthValue {
+    font-family: var(--font-sans);
+    /* Use sans for cleaner look in this theme */
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    border: none;
+}
+
+.targetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.gapContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.gapLabel {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.gapValue {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.positive {
+    color: var(--color-success);
+}
+
+.negative {
+    color: var(--color-danger);
+}
+
+.progressBar {
+    height: 8px;
+    background-color: #f1f2f6;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressText {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.predictionText {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.highlight {
+    color: var(--primary-purple);
+    font-weight: 700;
+}
+
+.successText {
+    color: var(--color-success);
+    font-weight: 700;
+}

@@ -1,0 +1,350 @@
+[
+  {
+    "id": "2025-1",
+    "year": 2025,
+    "month": 1,
+    "date": "2025-01-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-1-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 100000000
+      },
+      {
+        "id": "2025-1-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 1000000,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-1-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 35000000
+      },
+      {
+        "id": "2025-1-stock-bumi",
+        "type": "stock",
+        "name": "BUMI",
+        "ticker": "BUMI.JK",
+        "quantity": 1224400,
+        "currency": "IDR",
+        "manual_price_idr": 107
+      },
+      {
+        "id": "2025-1-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 1503000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 1695012789.0
+  },
+  {
+    "id": "2025-5",
+    "year": 2025,
+    "month": 5,
+    "date": "2025-05-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-5-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 100000000
+      },
+      {
+        "id": "2025-5-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 1000000,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-5-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 21225974
+      },
+      {
+        "id": "2025-5-stock-bumi",
+        "type": "stock",
+        "name": "BUMI",
+        "ticker": "BUMI.JK",
+        "quantity": 1224400,
+        "currency": "IDR",
+        "manual_price_idr": 107
+      },
+      {
+        "id": "2025-5-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 1969000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2032304134.0
+  },
+  {
+    "id": "2025-6",
+    "year": 2025,
+    "month": 6,
+    "date": "2025-06-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-6-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 100000000
+      },
+      {
+        "id": "2025-6-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 1000000,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-6-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 29870000
+      },
+      {
+        "id": "2025-6-stock-bumi",
+        "type": "stock",
+        "name": "BUMI",
+        "ticker": "BUMI.JK",
+        "quantity": 1224400,
+        "currency": "IDR",
+        "manual_price_idr": 120
+      },
+      {
+        "id": "2025-6-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 1924000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2040140490.0
+  },
+  {
+    "id": "2025-8",
+    "year": 2025,
+    "month": 8,
+    "date": "2025-08-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-8-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 100000000
+      },
+      {
+        "id": "2025-8-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 1220,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-8-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 253660000
+      },
+      {
+        "id": "2025-8-stock-bumi",
+        "type": "stock",
+        "name": "BUMI",
+        "ticker": "BUMI.JK",
+        "quantity": 899200,
+        "currency": "IDR",
+        "manual_price_idr": 111
+      },
+      {
+        "id": "2025-8-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 1933000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2044951960.0
+  },
+  {
+    "id": "2025-10",
+    "year": 2025,
+    "month": 10,
+    "date": "2025-10-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-10-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-10-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 7220,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-10-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 257640000
+      },
+      {
+        "id": "2025-10-stock-bumi",
+        "type": "stock",
+        "name": "BUMI",
+        "ticker": "BUMI.JK",
+        "quantity": 887700,
+        "currency": "IDR",
+        "manual_price_idr": 132
+      },
+      {
+        "id": "2025-10-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 2487000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2430074420.0
+  },
+  {
+    "id": "2025-11",
+    "year": 2025,
+    "month": 11,
+    "date": "2025-11-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-11-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 16622
+      },
+      {
+        "id": "2025-11-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 15000,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-11-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 231040099.56
+      },
+      {
+        "id": "2025-11-stock-bumi",
+        "type": "stock",
+        "name": "BUMI",
+        "ticker": "BUMI.JK",
+        "quantity": 500400,
+        "currency": "IDR",
+        "manual_price_idr": 246
+      },
+      {
+        "id": "2025-11-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 2273000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2454227099.56
+  },
+  {
+    "id": "2025-12",
+    "year": 2025,
+    "month": 12,
+    "date": "2025-12-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-12-cash-td",
+        "type": "cash",
+        "name": "TD (Time Deposit)",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 16694
+      },
+      {
+        "id": "2025-12-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 10000,
+        "currency": "JPY",
+        "manual_price_idr": 0
+      },
+      {
+        "id": "2025-12-cash-ba",
+        "type": "cash",
+        "name": "BA",
+        "quantity": 1,
+        "currency": "IDR",
+        "manual_price_idr": 230650633.2
+      },
+      {
+        "id": "2025-12-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 550,
+        "currency": "IDR",
+        "manual_price_idr": 2600000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2735725662.1490316
+  }
+]

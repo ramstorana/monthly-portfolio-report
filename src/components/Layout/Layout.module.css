@@ -1,0 +1,61 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+}
+
+.content {
+    flex: 1;
+    padding: 24px;
+    padding-bottom: 90px;
+    /* Space for bottom nav */
+    max-width: 480px;
+    /* Mobile focused max-width */
+    margin: 0 auto;
+    width: 100%;
+}
+
+.bottomNav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    height: 70px;
+    background-color: var(--card-bg);
+    border-radius: 35px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    padding: 0 10px;
+}
+
+.navItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.navItem.active {
+    color: var(--primary-purple);
+    background-color: rgba(108, 92, 231, 0.1);
+}
+
+.navLabel {
+    display: none;
+    /* Cleaner look, just icons */
+}

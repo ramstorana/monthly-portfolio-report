@@ -1,0 +1,63 @@
+:root {
+  /* Core Colors */
+  --primary-purple: #6c5ce7;
+  /* Soft bright purple */
+  --primary-purple-dark: #5849be;
+  --accent-lime: #a29bfe;
+  /* Lighter purple/blue for accents */
+  --accent-green: #00b894;
+  /* Mint green */
+  --accent-red: #ff7675;
+  /* Soft red */
+
+  /* Backgrounds */
+  --bg-color: #f7f9fc;
+  /* Light gray blueish background */
+  --card-bg: #ffffff;
+  --sidebar-bg: #ffffff;
+
+  /* Text */
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+  --text-inverse: #ffffff;
+  /* Text on purple cards */
+
+  /* Borders & Shadows */
+  --border-color: #e6e6e6;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* Status Colors */
+  --color-success: #00b894;
+  --color-danger: #d63031;
+  --color-warning: #fdcb6e;
+
+  /* Fonts */
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, monospace;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.card-base {
+  background: var(--card-bg);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}

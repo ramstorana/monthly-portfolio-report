@@ -1,0 +1,30 @@
+export const WEALTH_TARGETS = [
+  { year: 2025, target: 2700000000, cagr: 0 },
+  { year: 2026, target: 3915000000, cagr: 0.45 },
+  { year: 2027, target: 5676000000, cagr: 0.45 },
+  { year: 2028, target: 8230000000, cagr: 0.45 },
+  { year: 2029, target: 11933000000, cagr: 0.45 },
+  { year: 2030, target: 17303000000, cagr: 0.45 },
+  { year: 2031, target: 25089000000, cagr: 0.45 },
+  { year: 2032, target: 36380000000, cagr: 0.45 },
+  { year: 2033, target: 52751000000, cagr: 0.45 },
+  { year: 2034, target: 76489000000, cagr: 0.45 },
+  { year: 2035, target: 110909000000, cagr: 0.45 },
+  { year: 2036, target: 144182000000, cagr: 0.30 },
+  { year: 2037, target: 187437000000, cagr: 0.30 },
+  { year: 2038, target: 243668000000, cagr: 0.30 },
+  { year: 2039, target: 316768000000, cagr: 0.30 },
+  { year: 2040, target: 411798000000, cagr: 0.30 },
+  { year: 2041, target: 535337000000, cagr: 0.30 },
+  { year: 2042, target: 615638000000, cagr: 0.15 },
+  { year: 2043, target: 708984000000, cagr: 0.15 },
+  { year: 2044, target: 815332000000, cagr: 0.15 },
+  { year: 2045, target: 937632000000, cagr: 0.15 },
+  { year: 2046, target: 1078277000000, cagr: 0.15 },
+];
+
+export const PHASES = {
+  1: { name: 'Aggressive Growth', years: [2026, 2035], riskLimit: 0.50 },
+  2: { name: 'Scaling', years: [2036, 2041], riskLimit: 0.40 },
+  3: { name: 'Preservation', years: [2042, 2046], riskLimit: 0.25 },
+};
