@@ -15,7 +15,7 @@ const INITIAL_ASSETS = [
     { id: '4', type: 'crypto', name: 'Bitcoin', ticker: 'BTC', quantity: 0.11278015, manual_price_idr: 0, currency: 'IDR' },
 
     // Stocks
-    { id: '5', type: 'stock', name: 'Jasa Marga', ticker: 'JSMR.JK', quantity: 18600, manual_price_idr: 0, currency: 'IDR' },
+    { id: '5', type: 'stock', name: 'Jasa Marga', ticker: 'JSMR.JK', quantity: 9300, manual_price_idr: 0, currency: 'IDR' },
     { id: '6', type: 'stock', name: 'Bumi Resources', ticker: 'BUMI.JK', quantity: 150500, manual_price_idr: 0, currency: 'IDR' },
     { id: '7', type: 'stock', name: 'Adaro Minerals', ticker: 'AADI.JK', quantity: 13800, manual_price_idr: 0, currency: 'IDR' },
     { id: '8', type: 'stock', name: 'Saratoga', ticker: 'SRTG.JK', quantity: 93000, manual_price_idr: 0, currency: 'IDR' },

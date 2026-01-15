@@ -118,17 +118,17 @@ const Allocation = () => {
                         Single Stock Breakdown ({stockProportion.toFixed(1)}%)
                     </h3>
                     {stockAssets.map((asset) => (
-                        <div key={asset.id} className={styles.row} style={{ alignItems: 'center' }}>
+                        <div key={asset.id} className={styles.row}>
                             <div className={styles.rowLabel}>
                                 <div>
                                     <div className={styles.assetType} style={{ fontWeight: 600 }}>{asset.name}</div>
                                     <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{asset.ticker}</div>
                                 </div>
                             </div>
-                            <div className={styles.rowValues} style={{ textAlign: 'right' }}>
-                                <div className={styles.value} style={{ fontWeight: 600 }}>{formatIDR(asset.currentValue)}</div>
+                            <div className={styles.rowValues}>
+                                <div className={styles.value} style={{ fontWeight: 600 }}>{formatIDR(asset.currentValue || 0)}</div>
                                 <div className={styles.percent} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                                    {((asset.currentValue / totalNetWorth) * 100).toFixed(2)}%
+                                    {totalNetWorth > 0 ? ((asset.currentValue / totalNetWorth) * 100).toFixed(2) : '0.00'}%
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
@@ -173,12 +173,12 @@ const Allocation = () => {
             <div className={styles.table}>
                 <h3 style={{ fontSize: 16, marginBottom: 16, paddingBottom: 8 }}>All Holdings</h3>
                 {assets.map((item) => (
-                    <div key={item.id} className={styles.row} style={{ alignItems: 'center' }}>
+                    <div key={item.id} className={styles.row}>
                         <div className={styles.rowLabel}>
                             <span className={styles.assetType} style={{ fontWeight: 600 }}>{item.name}</span>
                         </div>
-                        <div className={styles.rowValues} style={{ textAlign: 'right' }}>
-                            <div className={styles.value} style={{ fontWeight: 600 }}>{formatIDR(item.currentValue)}</div>
+                        <div className={styles.rowValues}>
+                            <div className={styles.value} style={{ fontWeight: 600 }}>{formatIDR(item.currentValue || 0)}</div>
                             <div className={styles.percent} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                                 {item.type.toUpperCase()}
                             </div>

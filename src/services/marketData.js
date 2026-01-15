@@ -3,8 +3,8 @@ import { PortfolioService } from './PortfolioService';
 // Yahoo Finance API via Proxy
 const YAHOO_API_BASE = '/api/yahoo/v8/finance/chart';
 
-// Cache to prevent rate limiting (1 minute)
-const CACHE_DURATION = 60000; // 1 minute
+// Cache to prevent rate limiting (5 minutes)
+const CACHE_DURATION = 300000;
 const CACHE = {
     bitcoin: { data: null, timestamp: 0 },
     gold: { data: null, timestamp: 0 },
