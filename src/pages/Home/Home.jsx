@@ -17,22 +17,20 @@ const Home = () => {
     const currentYear = new Date().getFullYear();
 
     // --- DATA INTEGRATION: 2025 History + Current 2026 Live Data ---
-    // 1. Process 2025 data
+    // 1. Process 2025 data + Current 2026
     const historyData = useMemo(() => {
         // Map 2025 history to chart format
-        const hist2025 = history2025.map(h => ({
-            month: getMonthName(h.month - 1).substring(0, 3), // "Jan", "Feb"
-            fullMonth: getMonthName(h.month - 1),
+        let combinedData = history2025.map(h => ({
+            month: getMonthName(h.month - 1).substring(0, 3),
+            fullMonth: getMonthName(h.month - 1) + " " + h.year,
             value: h.totalNetWorth,
-            year: 2025,
+            year: h.year,
             isHistory: true
         }));
 
         // 2. Add Current Live Data (2026) if we are in 2026
-        // For simplicity, we assume we are just appending "Current" or the current month of 2026.
-        // User wants "Jan 2026" as current. 
         if (totalNetWorth > 0) {
-            hist2025.push({
+            combinedData.push({
                 month: getMonthName(new Date().getMonth()).substring(0, 3) + " '26",
                 fullMonth: getMonthName(new Date().getMonth()) + " 2026",
                 value: totalNetWorth,
@@ -41,7 +39,15 @@ const Home = () => {
             });
         }
 
-        return hist2025;
+        // 3. Calculate MoM Changes for Trend
+        return combinedData.map((item, index, arr) => {
+            const prev = arr[index - 1];
+            if (!prev) return { ...item, change: 0, changePercent: 0 };
+
+            const change = item.value - prev.value;
+            const changePercent = (change / prev.value) * 100;
+            return { ...item, change, changePercent };
+        });
     }, [totalNetWorth]);
 
     // --- METRIC CALCULATIONS (YoY & MoM) ---
@@ -50,12 +56,15 @@ const Home = () => {
     const yoyChange = totalNetWorth - last2025;
     const yoyPercent = (yoyChange / last2025) * 100;
 
-    // MoM Baseline: Previous Month 
-    // Logic: If current is Jan 2026, previous is Dec 2025.
-    // If current is Feb 2026, previous is Jan 2026 (snapshot needed), but for now we rely on history.
-    // With current setup (Dec 2025 vs Current), MoM is technically the same as YoY if current is Jan.
-    const momChange = totalNetWorth - last2025;
-    const momPercent = (momChange / last2025) * 100;
+    // MoM Baseline: Previous Month (Last item in history before current)
+    // If current is the last item, previous is the one before it.
+    // logic: historyData has everything. The last item is current. The 2nd to last is previous month.
+    const lastItem = historyData[historyData.length - 1] || { value: 0 };
+    const prevItem = historyData[historyData.length - 2] || { value: 1 };
+
+    // Override simple MoM with trend-based MoM (more robust if we have >1 month in 2026)
+    const momChange = lastItem.value - prevItem.value;
+    const momPercent = (momChange / prevItem.value) * 100;
 
     const chartData = historyData;
 
@@ -178,6 +187,7 @@ const Home = () => {
                             <Tooltip
                                 content={({ active, payload, label }) => {
                                     if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
                                         return (
                                             <div style={{
                                                 backgroundColor: 'var(--bg-card)',
@@ -185,14 +195,29 @@ const Home = () => {
                                                 borderRadius: 12,
                                                 padding: '12px 16px',
                                                 boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                                                minWidth: 140
+                                                minWidth: 160
                                             }}>
-                                                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                                                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
                                                     {label}
                                                 </div>
-                                                <div style={{ fontSize: 13, color: '#6c5ce7', fontWeight: 500 }}>
-                                                    value : {formatBillions(payload[0].value)}
+                                                <div style={{ marginBottom: 4 }}>
+                                                    <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Total: </span>
+                                                    <span style={{ fontSize: 13, color: '#6c5ce7', fontWeight: 600 }}>
+                                                        {formatBillions(data.value)}
+                                                    </span>
                                                 </div>
+                                                {data.change !== 0 && (
+                                                    <div>
+                                                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Change: </span>
+                                                        <span style={{
+                                                            fontSize: 13,
+                                                            fontWeight: 600,
+                                                            color: data.change >= 0 ? '#00b894' : '#d63031'
+                                                        }}>
+                                                            {data.change >= 0 ? '+' : ''}{formatBillions(data.change)} ({data.changePercent.toFixed(1)}%)
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     }
