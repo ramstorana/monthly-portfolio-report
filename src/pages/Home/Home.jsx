@@ -8,41 +8,56 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import { Download } from 'lucide-react';
 import styles from './Home.module.css';
 
+import history2025 from '../../data/history_2025.json';
+
 const Home = () => {
     const { assets, totalNetWorth, target, loading } = usePortfolio();
 
-    // --- Metric Calculations (Mocked for now until History is fully populated) ---
-    // In strict v4.0, these come from checking snapshots.
-    // Baseline: Dec 31, 2025 (2.7B start for 2026?) -> Assuming we are in 2026 now? 
-    // Wait, SRD says "Project-Based". Let's assume current year is the project year.
+    // --- CONTEXT: PROJECT YEAR ---
     const currentYear = new Date().getFullYear();
-    const prevYear = currentYear - 1;
 
-    // Simulating History Data for MVP Visualization
-    // Replace this with `PortfolioService.getHistory()` in real integration
-    const historyData = [
-        { month: 'Jan', value: 280000000 },
-        { month: 'Feb', value: 320000000 },
-        { month: 'Mar', value: 380000000 },
-        { month: 'Dec', value: 2700000000 }, // Dec 2025 (Baseline)
-        { month: 'Jan', value: 2800000000 }, // Jan 2026
-        { month: 'Apr', value: totalNetWorth }, // Current
-    ];
+    // --- DATA INTEGRATION: 2025 History + Current 2026 Live Data ---
+    // 1. Process 2025 data
+    const historyData = useMemo(() => {
+        // Map 2025 history to chart format
+        const hist2025 = history2025.map(h => ({
+            month: getMonthName(h.month - 1).substring(0, 3), // "Jan", "Feb"
+            fullMonth: getMonthName(h.month - 1),
+            value: h.totalNetWorth,
+            year: 2025,
+            isHistory: true
+        }));
 
-    // YoY Baseline (Dec 31 of previous year)
-    // If no data, fallback to Jan 1
-    const yoyBaseline = 2700000000; // Mocked from "2025 Initial"
-    const yoyChange = totalNetWorth - yoyBaseline;
-    const yoyPercent = (yoyChange / yoyBaseline) * 100;
+        // 2. Add Current Live Data (2026) if we are in 2026
+        // For simplicity, we assume we are just appending "Current" or the current month of 2026.
+        // User wants "Jan 2026" as current. 
+        if (totalNetWorth > 0) {
+            hist2025.push({
+                month: getMonthName(new Date().getMonth()).substring(0, 3) + " '26",
+                fullMonth: getMonthName(new Date().getMonth()) + " 2026",
+                value: totalNetWorth,
+                year: 2026,
+                isHistory: false
+            });
+        }
 
-    // MoM Baseline (Previous Month)
-    const momBaseline = 2800000000; // Mocked "Last Month"
-    const momChange = totalNetWorth - momBaseline;
-    const momPercent = (momChange / momBaseline) * 100;
+        return hist2025;
+    }, [totalNetWorth]);
 
-    // Timeline Data (Jan 2025 -> Current)
-    // Filter to only show up to current month (no future)
-    const chartData = historyData.filter(d => true); // All history is past/present
+    // --- METRIC CALCULATIONS (YoY & MoM) ---
+    // YoY Baseline: Dec 31, 2025 (Last point of 2025 history)
+    const last2025 = history2025[history2025.length - 1]?.totalNetWorth || 1;
+    const yoyChange = totalNetWorth - last2025;
+    const yoyPercent = (yoyChange / last2025) * 100;
+
+    // MoM Baseline: Previous Month 
+    // Logic: If current is Jan 2026, previous is Dec 2025.
+    // If current is Feb 2026, previous is Jan 2026 (snapshot needed), but for now we rely on history.
+    // With current setup (Dec 2025 vs Current), MoM is technically the same as YoY if current is Jan.
+    const momChange = totalNetWorth - last2025;
+    const momPercent = (momChange / last2025) * 100;
+
+    const chartData = historyData;
 
     // --- UI Helpers ---
     const getStatusColor = (val) => val >= 0 ? '#00b894' : '#d63031';
@@ -203,7 +218,7 @@ const Home = () => {
                     paddingTop: 16,
                     borderTop: '1px dashed var(--border-color)'
                 }}>
-                    Jan 2025 — Present (16 Months)
+                    Jan 2025 — Present
                 </div>
             </div>
 
