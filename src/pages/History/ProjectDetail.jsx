@@ -491,10 +491,12 @@ const ProjectDetail = () => {
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
                                             marginBottom: 12,
-                                            padding: '10px 12px',
-                                            backgroundColor: CATEGORY_COLORS[cat] + '20',
-                                            borderRadius: 10,
-                                            borderLeft: `4px solid ${CATEGORY_COLORS[cat]}`
+                                            padding: '12px 16px',
+                                            backgroundColor: CATEGORY_COLORS[cat], // Solid color
+                                            borderRadius: 12,
+                                            color: '#fff', // White text for contrast
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                         }}>
                                             <span style={{ fontWeight: 700, fontSize: 13 }}>
                                                 {CATEGORY_LABELS[cat]}
