@@ -194,37 +194,85 @@ const ProjectDetail = () => {
                 </div>
             </div>
 
-            {/* Monthly Progression Chart */}
+            {/* Net Worth Chart */}
             <div style={cardStyle}>
-                <h3 style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, fontWeight: 600 }}>
-                    MONTHLY PROGRESSION
-                </h3>
-                <div style={{ height: 180, width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+                        Net Worth Over Time
+                    </h3>
+                    <span style={{ fontSize: 13, color: 'var(--primary-purple)', cursor: 'pointer', fontWeight: 500 }}>
+                        Expand
+                    </span>
+                </div>
+
+                <div style={{ height: 260, width: '100%', marginBottom: 16 }}>
                     <ResponsiveContainer>
-                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorValueHistory" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6c5ce7" stopOpacity={0.3} />
+                                    <stop offset="5%" stopColor="#6c5ce7" stopOpacity={0.2} />
                                     <stop offset="95%" stopColor="#6c5ce7" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#888', fontSize: 11 }} />
-                            <YAxis
-                                domain={['dataMin - 100000000', 'auto']}
+                            <CartesianGrid strokeDasharray="4 4" vertical={true} stroke="var(--border-color)" opacity={0.5} />
+                            <XAxis
+                                dataKey="name"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#888', fontSize: 10 }}
-                                tickFormatter={(val) => (val / 1e9).toFixed(1) + 'B'}
-                                width={45}
+                                tick={{ fill: '#888', fontSize: 12, dy: 10 }}
+                                minTickGap={30}
+                            />
+                            <YAxis
+                                domain={['dataMin - 50000000', 'auto']}
+                                axisLine={false}
+                                tickLine={false}
+                                tick={false}
+                                width={1}
                             />
                             <Tooltip
-                                formatter={(value) => [formatBillions(value), 'Net Worth']}
-                                contentStyle={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: 8 }}
+                                content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                        return (
+                                            <div style={{
+                                                backgroundColor: 'var(--bg-card)',
+                                                border: 'none',
+                                                borderRadius: 12,
+                                                padding: '12px 16px',
+                                                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                                                minWidth: 140
+                                            }}>
+                                                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                                                    {label}
+                                                </div>
+                                                <div style={{ fontSize: 13, color: '#6c5ce7', fontWeight: 500 }}>
+                                                    value : {formatBillions(payload[0].value)}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
                             />
-                            <Area type="monotone" dataKey="value" stroke="#6c5ce7" strokeWidth={2.5} fill="url(#colorValueHistory)" />
+                            <Area
+                                type="monotone"
+                                dataKey="value"
+                                stroke="#6c5ce7"
+                                strokeWidth={3}
+                                fill="url(#colorValueHistory)"
+                                activeDot={{ r: 6, strokeWidth: 2, fill: 'var(--bg-main)', stroke: '#6c5ce7' }}
+                            />
                         </AreaChart>
                     </ResponsiveContainer>
+                </div>
+
+                <div style={{
+                    textAlign: 'center',
+                    fontSize: 13,
+                    color: 'var(--text-secondary)',
+                    paddingTop: 16,
+                    borderTop: '1px dashed var(--border-color)'
+                }}>
+                    Jan {year} — Dec {year} ({yearSnapshots.length} Months)
                 </div>
             </div>
 
