@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { fetchBitcoinPrice, fetchGoldPrice, fetchExchangeRates } from '../services/marketData';
+import { fetchBitcoinPrice, fetchExchangeRates } from '../services/marketData';
 import { formatIDR } from '../utils/finance';
 
 const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
@@ -32,13 +32,11 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
     const loadMarketData = async () => {
         setMarketLoading(true);
         try {
-            const [btc, gold, fx] = await Promise.all([
+            const [btc, fx] = await Promise.all([
                 fetchBitcoinPrice(),
-                fetchGoldPrice(),
                 fetchExchangeRates()
             ]);
             setBtcPrice(btc);
-            setGoldPrice(gold);
             setFxRates(fx);
         } finally {
             setMarketLoading(false);
@@ -76,7 +74,7 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
 
 
     // --- Dynamic Constants based on Type ---
-    const isAutoPriced = type === 'crypto' || type === 'gold' || type === 'cash';
+    const isAutoPriced = type === 'crypto' || type === 'cash';
 
     // Fetch stock price when ticker changes
     useEffect(() => {

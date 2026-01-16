@@ -19,7 +19,6 @@ const convertToTwelveDataSymbol = (ticker) => {
     // Forex and crypto symbols
     if (ticker === 'USDIDR=X') return 'USD/IDR';
     if (ticker === 'JPYIDR=X') return 'JPY/IDR';
-    if (ticker === 'XAUUSD=X') return 'XAU/USD';
     if (ticker === 'BTC-IDR') return 'BTC/IDR';
     return ticker;
 };
@@ -168,9 +167,7 @@ export const fetchBitcoinPrice = async () => {
 };
 
 export const fetchGoldPrice = async () => {
-    // Logam Mulia price reference (Jan 2026) ~ Rp 2.675.000 / gram
-    // For now use static until we find a reliable gold API
-    return 2675000;
+    return 0;
 };
 
 export const fetchExchangeRates = async () => {
