@@ -138,41 +138,81 @@ const Home = () => {
 
             {/* --- TIMELINE CHART --- */}
             <div className={styles.card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <h3 style={{ fontSize: 16, margin: 0 }}>Net Worth Over Time</h3>
-                    <div style={{ fontSize: 12, color: 'var(--primary-purple)', cursor: 'pointer' }}>Expand</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Net Worth Over Time</h3>
+                    <div style={{ fontSize: 13, color: 'var(--primary-purple)', cursor: 'pointer', fontWeight: 500 }}>Expand</div>
                 </div>
 
-                <div style={{ height: 200, width: '100%', fontSize: 11 }}>
+                <div style={{ height: 260, width: '100%', marginBottom: 16 }}>
                     <ResponsiveContainer>
-                        <AreaChart data={chartData}>
+                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="var(--primary-purple)" stopOpacity={0.2} />
-                                    <stop offset="95%" stopColor="var(--primary-purple)" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="#6c5ce7" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="#6c5ce7" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
-                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#888' }} />
-                            <YAxis hide domain={['auto', 'auto']} />
-                            <Tooltip
-                                formatter={(value) => formatBillions(value)}
-                                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            <CartesianGrid strokeDasharray="4 4" vertical={true} stroke="var(--border-color)" opacity={0.5} />
+                            <XAxis
+                                dataKey="month"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#888', fontSize: 12, dy: 10 }}
                             />
-                            <Area type="monotone" dataKey="value" stroke="var(--primary-purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                            <YAxis
+                                hide
+                                domain={['auto', 'auto']}
+                            />
+                            <Tooltip
+                                content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                        return (
+                                            <div style={{
+                                                backgroundColor: 'var(--bg-card)',
+                                                border: 'none',
+                                                borderRadius: 12,
+                                                padding: '12px 16px',
+                                                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                                                minWidth: 140
+                                            }}>
+                                                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                                                    {label}
+                                                </div>
+                                                <div style={{ fontSize: 13, color: '#6c5ce7', fontWeight: 500 }}>
+                                                    value : {formatBillions(payload[0].value)}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="value"
+                                stroke="#6c5ce7"
+                                strokeWidth={3}
+                                fillOpacity={1}
+                                fill="url(#colorValue)"
+                                activeDot={{ r: 6, strokeWidth: 2, fill: 'var(--bg-main)', stroke: '#6c5ce7' }}
+                            />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
-                <div style={{ textAlign: 'center', marginTop: 12, fontSize: 12, color: 'var(--text-secondary)' }}>
+                <div style={{
+                    textAlign: 'center',
+                    fontSize: 13,
+                    color: 'var(--text-secondary)',
+                    paddingTop: 16,
+                    borderTop: '1px dashed var(--border-color)'
+                }}>
                     Jan 2025 — Present (16 Months)
                 </div>
             </div>
 
             {/* --- NAVIGATION LINKS --- */}
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <button className={styles.navButton} onClick={() => window.location.href = '/portfolio'}>
-                    View Portfolio Holdings →
-                </button>
+                {/* Navigation links removed */}
             </div>
 
             <div style={{ height: 80 }}></div>
