@@ -157,39 +157,70 @@ const ProjectDetail = () => {
             </div>
 
             {/* Year Summary Card */}
-            <div style={cardStyle}>
-                <h3 style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20, fontWeight: 600 }}>
-                    YEAR SUMMARY
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 20 }}>
-                    <div>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Starting (Jan)</div>
-                        <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                            {formatBillions(projectStats.start)}
+            {/* YoY & MoM Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+                {/* YoY Card */}
+                <div style={cardStyle}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            YoY ({getMonthName(yearSnapshots[0]?.month - 1).substring(0, 3)} → {getMonthName(yearSnapshots[yearSnapshots.length - 1]?.month - 1).substring(0, 3)})
+                        </span>
+                        <div style={{ padding: 6, borderRadius: '50%', backgroundColor: 'var(--bg-main)', cursor: 'pointer' }}>
+                            <TrendingUp size={14} color="var(--text-secondary)" />
                         </div>
                     </div>
-                    <div>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Ending (Dec)</div>
-                        <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                            {formatBillions(projectStats.end)}
+                    <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-mono)', marginBottom: 4 }}>
+                        {formatBillions(projectStats.gain)}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: projectStats.gain >= 0 ? '#00b894' : '#d63031'
+                        }}>
+                            {projectStats.gain >= 0 ? '+' : ''}{projectStats.gainPercent.toFixed(1)}%
                         </div>
+                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                            {projectStats.gain >= 0 ? 'Total Profit' : 'Total Loss'}
+                        </span>
                     </div>
                 </div>
-                <div style={{
-                    padding: '16px 0',
-                    borderTop: '1px solid var(--border-color)',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}>
-                    <span style={{ fontSize: 14, fontWeight: 600 }}>Total Gain</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {projectStats.gain >= 0 ? <TrendingUp size={18} color="#00b894" /> : <TrendingDown size={18} color="#d63031" />}
-                        <span style={{
-                            fontSize: 16, fontWeight: 700,
-                            color: projectStats.gain >= 0 ? '#00b894' : '#d63031',
-                            fontFamily: 'var(--font-mono)'
-                        }}>
-                            {projectStats.gain >= 0 ? '+' : ''}{formatBillions(projectStats.gain)} ({projectStats.gainPercent.toFixed(1)}%)
+
+                {/* MoM Card (Last Month Change) */}
+                <div style={cardStyle}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            MoM (Last Mo)
                         </span>
+                        <div style={{ padding: 6, borderRadius: '50%', backgroundColor: 'var(--bg-main)', cursor: 'pointer' }}>
+                            <TrendingUp size={14} color="var(--text-secondary)" />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-mono)', marginBottom: 4 }}>
+                        {(() => {
+                            if (yearSnapshots.length < 2) return 'N/A';
+                            const last = yearSnapshots[yearSnapshots.length - 1].totalNetWorth;
+                            const prev = yearSnapshots[yearSnapshots.length - 2].totalNetWorth;
+                            const gain = last - prev;
+                            const pct = ((gain / prev) * 100);
+                            return (
+                                <>
+                                    {formatBillions(gain)}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                                        <div style={{
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            color: gain >= 0 ? '#00b894' : '#d63031',
+                                        }}>
+                                            {gain >= 0 ? '+' : ''}{pct.toFixed(1)}%
+                                        </div>
+                                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                                            {gain >= 0 ? 'Profit' : 'Loss'}
+                                        </span>
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>
