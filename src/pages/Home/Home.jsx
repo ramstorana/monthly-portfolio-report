@@ -138,77 +138,76 @@ const Home = () => {
 
             {/* --- TIMELINE CHART --- */}
             <div className={styles.card}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Net Worth Over Time</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 20px 0' }}>Net Worth Over Time</h3>
+
+                <div style={{ height: 260, width: '100%', marginBottom: 16 }}>
+                    <ResponsiveContainer>
+                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6c5ce7" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="#6c5ce7" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="4 4" vertical={true} stroke="var(--border-color)" opacity={0.5} />
+                            <XAxis
+                                dataKey="month"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#888', fontSize: 12, dy: 10 }}
+                            />
+                            <YAxis
+                                hide
+                                domain={['auto', 'auto']}
+                            />
+                            <Tooltip
+                                content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                        return (
+                                            <div style={{
+                                                backgroundColor: 'var(--bg-card)',
+                                                border: 'none',
+                                                borderRadius: 12,
+                                                padding: '12px 16px',
+                                                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                                                minWidth: 140
+                                            }}>
+                                                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                                                    {label}
+                                                </div>
+                                                <div style={{ fontSize: 13, color: '#6c5ce7', fontWeight: 500 }}>
+                                                    value : {formatBillions(payload[0].value)}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="value"
+                                stroke="#6c5ce7"
+                                strokeWidth={3}
+                                fillOpacity={1}
+                                fill="url(#colorValue)"
+                                activeDot={{ r: 6, strokeWidth: 2, fill: 'var(--bg-main)', stroke: '#6c5ce7' }}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+                <div style={{
+                    textAlign: 'center',
+                    fontSize: 13,
+                    color: 'var(--text-secondary)',
+                    paddingTop: 16,
+                    borderTop: '1px dashed var(--border-color)'
+                }}>
+                    Jan 2025 — Present (16 Months)
+                </div>
             </div>
 
-            <div style={{ height: 260, width: '100%', marginBottom: 16 }}>
-                <ResponsiveContainer>
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <defs>
-                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#6c5ce7" stopOpacity={0.2} />
-                                <stop offset="95%" stopColor="#6c5ce7" stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="4 4" vertical={true} stroke="var(--border-color)" opacity={0.5} />
-                        <XAxis
-                            dataKey="month"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: '#888', fontSize: 12, dy: 10 }}
-                        />
-                        <YAxis
-                            hide
-                            domain={['auto', 'auto']}
-                        />
-                        <Tooltip
-                            content={({ active, payload, label }) => {
-                                if (active && payload && payload.length) {
-                                    return (
-                                        <div style={{
-                                            backgroundColor: 'var(--bg-card)',
-                                            border: 'none',
-                                            borderRadius: 12,
-                                            padding: '12px 16px',
-                                            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                                            minWidth: 140
-                                        }}>
-                                            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
-                                                {label}
-                                            </div>
-                                            <div style={{ fontSize: 13, color: '#6c5ce7', fontWeight: 500 }}>
-                                                value : {formatBillions(payload[0].value)}
-                                            </div>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            }}
-                        />
-                        <Area
-                            type="monotone"
-                            dataKey="value"
-                            stroke="#6c5ce7"
-                            strokeWidth={3}
-                            fillOpacity={1}
-                            fill="url(#colorValue)"
-                            activeDot={{ r: 6, strokeWidth: 2, fill: 'var(--bg-main)', stroke: '#6c5ce7' }}
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-            <div style={{
-                textAlign: 'center',
-                fontSize: 13,
-                color: 'var(--text-secondary)',
-                paddingTop: 16,
-                borderTop: '1px dashed var(--border-color)'
-            }}>
-                Jan 2025 — Present (16 Months)
-            </div>
-        </div>
-
-            {/* --- NAVIGATION LINKS --- */ }
+            {/* --- NAVIGATION LINKS --- */}
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {/* Navigation links removed */}
             </div>
