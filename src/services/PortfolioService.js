@@ -2,7 +2,7 @@ import { fetchBitcoinPrice, fetchGoldPrice, fetchExchangeRates, fetchStockPrice 
 import { getWIBDate, isEndOfMonthWIB, formatDateWIB } from '../utils/time.js';
 import { HISTORY_2025 } from '../data/history.js';
 
-const STORAGE_KEY = 'networth_data_v4_3'; // Bumped for 2026 update
+const STORAGE_KEY = 'networth_data_v4_4'; // Bumped for 2026 update (JSMR fix)
 
 // Initial Data from '1-JAN-2026 POSITION copy.xlsx'
 const INITIAL_ASSETS = [
@@ -64,7 +64,12 @@ export const PortfolioService = {
 
     async addAsset(asset) {
         const data = this.getData();
-        const newAsset = { ...asset, id: crypto.randomUUID() };
+        const newAsset = {
+            ...asset,
+            id: (typeof crypto !== 'undefined' && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        };
         data.assets.push(newAsset);
         this.saveData(data);
         return newAsset;
@@ -155,15 +160,36 @@ export const PortfolioService = {
     async calculatePortfolioValues(assets) {
         if (!assets || assets.length === 0) return [];
 
-        const [btcPrice, goldPrice, fxRates] = await Promise.all([
-            fetchBitcoinPrice(),
-            fetchGoldPrice(),
-            fetchExchangeRates()
-        ]);
+        // 1. Gather all tickers to fetch
+        const stockTickers = assets
+            .filter(a => a.type === 'stock' && a.ticker)
+            .map(a => a.ticker);
 
-        const updatedAssets = await Promise.all(assets.map(async (asset) => {
+        // 2. Fetch all market data in on go
+        // We import fetchMarketData dynamically or assume it's imported (need to update imports)
+        const marketData = await import('./marketData.js').then(m => m.fetchMarketData(stockTickers));
+
+        // Extract standard indices
+        const btcPrice = marketData['BTC-IDR'] || 1633000000;
+        const goldUsdOz = marketData['XAUUSD=X'];
+        const usdIdr = marketData['USDIDR=X'] || 16800;
+        const jpyIdr = marketData['JPYIDR=X'] || 108;
+
+        // Gold Calc
+        let goldPrice = 1450000;
+        if (goldUsdOz && usdIdr) {
+            goldPrice = (goldUsdOz * usdIdr) / 31.1035;
+        }
+
+        const fxRates = {
+            IDR: 1,
+            USD: usdIdr,
+            JPY: jpyIdr,
+            SGD: 12100 // Hardcoded fallback or need symbol
+        };
+
+        const updatedAssets = assets.map((asset) => {
             let currentPrice = 0;
-            // Default currency to IDR if undefined
             const currency = asset.currency || 'IDR';
             const exchangeRate = fxRates[currency] || 1;
 
@@ -173,11 +199,16 @@ export const PortfolioService = {
                         currentPrice = (asset.ticker === 'BTC') ? btcPrice : (parseFloat(asset.manual_price_idr) || 0);
                         break;
                     case 'gold':
-                        currentPrice = goldPrice;
+                        currentPrice = parseFloat(asset.manual_price_idr) || 0;
                         break;
                     case 'stock':
                         if (asset.ticker) {
-                            currentPrice = await fetchStockPrice(asset.ticker);
+                            // Use the batch fetched price!
+                            currentPrice = marketData[asset.ticker] || 0;
+                            // Fallback if 0 (failed fetch)
+                            if (currentPrice === 0) {
+                                currentPrice = parseFloat(asset.manual_price_idr) || 0;
+                            }
                         } else {
                             currentPrice = parseFloat(asset.manual_price_idr) || 0;
                         }
@@ -186,8 +217,6 @@ export const PortfolioService = {
                         currentPrice = parseFloat(asset.manual_price_idr) || 0;
                         break;
                     case 'cash':
-                        // For cash, "Price" is effectively 1 unit of that currency.
-                        // We use the exchange rate as the "Current Price in IDR"
                         currentPrice = exchangeRate;
                         break;
                     default:
@@ -195,13 +224,12 @@ export const PortfolioService = {
                         break;
                 }
 
-                // If asset has quantity, use it. Default to 0.
                 const qty = parseFloat(asset.quantity) || 0;
 
                 return {
                     ...asset,
-                    currentPrice, // This is Price in IDR per unit (or per currency unit)
-                    currentValue: qty * currentPrice,  // Total Value in IDR
+                    currentPrice,
+                    currentValue: qty * (currentPrice || 0),
                     exchangeRateUsed: exchangeRate
                 };
 
@@ -209,7 +237,7 @@ export const PortfolioService = {
                 console.error(`Failed to calculate value for asset ${asset.name}:`, err);
                 return { ...asset, currentPrice: 0, currentValue: 0, error: true };
             }
-        }));
+        });
 
         return updatedAssets;
     },

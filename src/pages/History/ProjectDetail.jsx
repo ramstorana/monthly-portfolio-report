@@ -135,12 +135,15 @@ const ProjectDetail = () => {
                             cursor: 'pointer', transition: 'background-color 0.2s'
                         }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontWeight: 600, width: 40 }}>{getMonthName(snap.month - 1).substring(0, 3)}</span>
-                            {snap.isLocked && <Lock size={12} color="var(--text-secondary)" />}
-                        </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--primary-purple)' }}>
-                            {formatIDR(snap.totalNetWorth)}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr auto', alignItems: 'center', width: '100%', gap: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ fontWeight: 600, width: 40 }}>{getMonthName(snap.month - 1).substring(0, 3)}</span>
+                                {snap.isLocked && <Lock size={12} color="var(--text-secondary)" />}
+                            </div>
+                            <div style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--primary-purple)', fontWeight: 700 }}>
+                                {formatIDR(snap.totalNetWorth)}
+                            </div>
+                            <div style={{ width: 12 }}></div>
                         </div>
                     </div>
                 ))}
@@ -193,18 +196,19 @@ const ProjectDetail = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             {selectedMonth.assets.map((asset, idx) => (
                                 <div key={idx} style={{
-                                    display: 'flex', justifyContent: 'space-between',
-                                    borderBottom: '1px solid var(--border-color)', paddingBottom: 8
+                                    display: 'grid', gridTemplateColumns: '1fr 1fr auto', alignItems: 'center',
+                                    borderBottom: '1px solid var(--border-color)', padding: '12px 4px'
                                 }}>
                                     <div>
-                                        <div style={{ fontSize: 14, fontWeight: 500 }}>{asset.name}</div>
+                                        <div style={{ fontSize: 14, fontWeight: 600 }}>{asset.name}</div>
                                         <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{asset.type.toUpperCase()}</div>
                                     </div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: 14, fontFamily: 'var(--font-mono)' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                                             {formatIDR((parseFloat(asset.quantity) || 0) * (parseFloat(asset.manual_price_idr) || 0))}
                                         </div>
                                     </div>
+                                    <div style={{ width: 4 }}></div>
                                 </div>
                             ))}
                         </div>

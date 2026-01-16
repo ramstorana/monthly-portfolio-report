@@ -14,9 +14,17 @@ export const usePortfolio = () => {
     useEffect(() => {
         loadPortfolio();
 
+        // Auto-refresh every 5 minutes (300000ms) to update market prices
+        const refreshInterval = setInterval(() => {
+            loadPortfolio();
+        }, 300000);
+
         // Listen for storage events to sync across tabs
         window.addEventListener('storage', loadPortfolio);
-        return () => window.removeEventListener('storage', loadPortfolio);
+        return () => {
+            clearInterval(refreshInterval);
+            window.removeEventListener('storage', loadPortfolio);
+        }
     }, []);
 
     const loadPortfolio = async () => {

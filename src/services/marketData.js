@@ -1,148 +1,213 @@
-import { PortfolioService } from './PortfolioService';
+// Twelve Data API for Indonesian Stocks (IDX)
+// Free tier: 800 calls/day, 8 calls/minute
 
-// Yahoo Finance API via Proxy
-const YAHOO_API_BASE = '/api/yahoo/v8/finance/chart';
+const TWELVEDATA_QUOTE_URL = '/api/twelvedata/quote';
+const API_KEY = import.meta.env.VITE_TWELVEDATA_API_KEY || '';
 
 // Cache to prevent rate limiting (5 minutes)
 const CACHE_DURATION = 300000;
-const CACHE = {
-    bitcoin: { data: null, timestamp: 0 },
-    gold: { data: null, timestamp: 0 },
-    fx: { data: null, timestamp: 0 },
-    stocks: {} // { "BUMI.JK": { data: 155, timestamp: ... } }
+let CACHE_DATA = {};
+let CACHE_TIMESTAMP = 0;
+let PENDING_PROMISE = null;
+
+// Convert Yahoo-style ticker (BBCA.JK) to Twelve Data format (BBCA:XIDX)
+const convertToTwelveDataSymbol = (ticker) => {
+    if (!ticker) return ticker;
+    if (ticker.endsWith('.JK')) {
+        return ticker.replace('.JK', ':XIDX');
+    }
+    // Forex and crypto symbols
+    if (ticker === 'USDIDR=X') return 'USD/IDR';
+    if (ticker === 'JPYIDR=X') return 'JPY/IDR';
+    if (ticker === 'XAUUSD=X') return 'XAU/USD';
+    if (ticker === 'BTC-IDR') return 'BTC/IDR';
+    return ticker;
+};
+
+// Convert back from Twelve Data symbol to original format for cache keys
+const convertFromTwelveDataSymbol = (symbol) => {
+    if (!symbol) return symbol;
+    if (symbol.includes(':XIDX')) {
+        return symbol.replace(':XIDX', '.JK');
+    }
+    if (symbol === 'USD/IDR') return 'USDIDR=X';
+    if (symbol === 'JPY/IDR') return 'JPYIDR=X';
+    if (symbol === 'XAU/USD') return 'XAUUSD=X';
+    if (symbol === 'BTC/IDR') return 'BTC-IDR';
+    return symbol;
+};
+
+// Default symbols for the portfolio
+const DEFAULT_SYMBOLS = [
+    'JSMR.JK', 'BUMI.JK', 'AADI.JK', 'SRTG.JK', 'TUGU.JK', 'BMRI.JK', 'BBCA.JK'
+];
+
+// Fallback mock prices when API fails
+const MOCK_PRICES = {
+    "BBCA.JK": 10200,
+    "BBRI.JK": 5400,
+    "BMRI.JK": 6800,
+    "TLKM.JK": 3200,
+    "ASII.JK": 5100,
+    "BUMI.JK": 422,
+    "JSMR.JK": 3410,
+    "AADI.JK": 7450,
+    "SRTG.JK": 1820,
+    "TUGU.JK": 1235,
+    "USDIDR=X": 16800,
+    "JPYIDR=X": 108,
+    "XAUUSD=X": 2650,
+    "BTC-IDR": 1633000000
 };
 
 /**
- * Helper to fetch price from Yahoo Finance Chart API
- * @param {string} symbol - Yahoo Finance symbol (e.g. "BUMI.JK", "BTC-IDR")
- * @returns {Promise<number>} - The latest price
+ * Fetches quotes for multiple symbols from Twelve Data
+ * @param {string[]} symbols - Original format symbols (e.g., BBCA.JK)
+ * @returns {Promise<Object>} - Map of original symbol -> price
  */
-const fetchYahooPrice = async (symbol) => {
-    try {
-        const response = await fetch(`${YAHOO_API_BASE}/${symbol}?interval=1d&range=1d`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+export const fetchBatchQuotes = async (symbols) => {
+    const now = Date.now();
 
-        const data = await response.json();
-        const result = data.chart.result[0];
-        const price = result.meta.regularMarketPrice;
-
-        if (price === undefined || price === null) {
-            throw new Error('Price not found in response');
-        }
-
-        return price;
-    } catch (error) {
-        console.error(`Failed to fetch ${symbol} from Yahoo:`, error);
-        throw error;
+    // Return cached data if still valid
+    if (now - CACHE_TIMESTAMP < CACHE_DURATION && Object.keys(CACHE_DATA).length > 0) {
+        console.log('[TwelveData] Using cached data');
+        return CACHE_DATA;
     }
+
+    // Dedupe pending requests
+    if (PENDING_PROMISE) {
+        return PENDING_PROMISE;
+    }
+
+    PENDING_PROMISE = (async () => {
+        try {
+            const uniqueSymbols = [...new Set(symbols)];
+
+            // Only fetch stock symbols via Twelve Data (they support IDX)
+            const stockSymbols = uniqueSymbols.filter(s => s.endsWith('.JK'));
+            const convertedSymbols = stockSymbols.map(convertToTwelveDataSymbol);
+
+            if (convertedSymbols.length === 0 || !API_KEY) {
+                console.warn('[TwelveData] No API key or stocks to fetch, using fallbacks');
+                return { ...MOCK_PRICES, ...CACHE_DATA };
+            }
+
+            // Twelve Data batch quote endpoint
+            const url = `${TWELVEDATA_QUOTE_URL}?symbol=${convertedSymbols.join(',')}&apikey=${API_KEY}`;
+            console.log('[TwelveData] Fetching:', convertedSymbols.join(', '));
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                console.warn(`[TwelveData] API fetch failed (${response.status})`);
+                return { ...MOCK_PRICES, ...CACHE_DATA };
+            }
+
+            const json = await response.json();
+
+            const priceMap = {};
+
+            // Handle single vs multiple symbol response
+            if (Array.isArray(json)) {
+                // Multiple symbols
+                json.forEach(quote => {
+                    if (quote.close) {
+                        const originalSymbol = convertFromTwelveDataSymbol(quote.symbol);
+                        priceMap[originalSymbol] = parseFloat(quote.close);
+                    }
+                });
+            } else if (json.close) {
+                // Single symbol
+                const originalSymbol = convertFromTwelveDataSymbol(json.symbol);
+                priceMap[originalSymbol] = parseFloat(json.close);
+            } else if (json.code) {
+                // API error response
+                console.warn('[TwelveData] API error:', json.message);
+                return { ...MOCK_PRICES, ...CACHE_DATA };
+            }
+
+            // Merge into cache with fallbacks
+            CACHE_DATA = { ...MOCK_PRICES, ...CACHE_DATA, ...priceMap };
+            CACHE_TIMESTAMP = Date.now();
+
+            console.log('[TwelveData] Fetched prices:', priceMap);
+            return CACHE_DATA;
+
+        } catch (error) {
+            console.error('[TwelveData] Fetch error:', error.message);
+            return { ...MOCK_PRICES, ...CACHE_DATA };
+        } finally {
+            PENDING_PROMISE = null;
+        }
+    })();
+
+    return PENDING_PROMISE;
+};
+
+/**
+ * Orchestrates fetching all necessary market data including dynamic stock tickers.
+ * @param {string[]} stockTickers - Any additional stock tickers to fetch.
+ */
+export const fetchMarketData = async (stockTickers = []) => {
+    const allSymbols = [...DEFAULT_SYMBOLS, ...stockTickers];
+    return await fetchBatchQuotes(allSymbols);
 };
 
 export const fetchBitcoinPrice = async () => {
-    const now = Date.now();
-    if (CACHE.bitcoin.data && (now - CACHE.bitcoin.timestamp < CACHE_DURATION)) {
-        return CACHE.bitcoin.data;
-    }
-
     try {
-        // Fetch BTC-IDR from Yahoo
-        const price = await fetchYahooPrice('BTC-IDR');
-        CACHE.bitcoin = { data: price, timestamp: now };
-        return price;
-    } catch (error) {
-        console.warn('Failed to fetch Bitcoin price, using fallback:', error);
-        // Fallback: Try CoinGecko via proxy if Yahoo fails
-        try {
-            const response = await fetch('/api/simple/price?ids=bitcoin&vs_currencies=idr');
+        // For BTC, use CoinGecko or fallback
+        const response = await fetch('/api/simple/price?ids=bitcoin&vs_currencies=idr');
+        if (response.ok) {
             const data = await response.json();
-            const cgPrice = data.bitcoin.idr;
-            CACHE.bitcoin = { data: cgPrice, timestamp: now };
-            return cgPrice;
-        } catch (err2) {
-            console.warn('CoinGecko fallback failed, using hardcoded', err2);
-            return 1633000000; // Fallback mock ~1.6B
+            return data.bitcoin?.idr || 1633000000;
         }
+    } catch (err) {
+        console.warn('[TwelveData] BTC fetch failed, using fallback');
     }
+    return 1633000000;
 };
 
 export const fetchGoldPrice = async () => {
-    const now = Date.now();
-    if (CACHE.gold.data && (now - CACHE.gold.timestamp < CACHE_DURATION)) {
-        return CACHE.gold.data;
-    }
-
-    try {
-        // Yahoo Gold is usually per Ounce in USD (Symbol: GC=F or XAUUSD=X)
-        // We need IDR per GRAM.
-        // Formula: (Gold_USD_OZ * USD_IDR) / 31.1035
-
-        const [goldUsdOz, usdIdr] = await Promise.all([
-            fetchYahooPrice('XAUUSD=X'),
-            fetchYahooPrice('USDIDR=X')
-        ]);
-
-        const goldIdrGram = (goldUsdOz * usdIdr) / 31.1035;
-
-        CACHE.gold = { data: goldIdrGram, timestamp: now };
-        return goldIdrGram;
-    } catch (error) {
-        console.warn('Using fallback Gold price', error);
-        return 1450000; // ~1.45M IDR per gram
-    }
+    // Logam Mulia price reference (Jan 2026) ~ Rp 2.675.000 / gram
+    // For now use static until we find a reliable gold API
+    return 2675000;
 };
 
 export const fetchExchangeRates = async () => {
-    const now = Date.now();
-    if (CACHE.fx.data && (now - CACHE.fx.timestamp < CACHE_DURATION)) {
-        return CACHE.fx.data;
-    }
-
     try {
-        // Fetch USD-IDR and JPY-IDR
-        const [usdIdr, jpyIdr] = await Promise.all([
-            fetchYahooPrice('USDIDR=X'),
-            fetchYahooPrice('JPYIDR=X')
-        ]);
-
-        const rates = {
-            IDR: 1,
-            USD: usdIdr,
-            JPY: jpyIdr,
-            SGD: 12000 // Fallback/Mock if needed, or add fetch
-        };
-
-        CACHE.fx = { data: rates, timestamp: now };
-        return rates;
-    } catch (error) {
-        console.error("FX fetch failed", error);
-        return { IDR: 1, USD: 16800, JPY: 108, SGD: 12100 };
+        // Try Twelve Data forex
+        if (API_KEY) {
+            const url = `${TWELVEDATA_QUOTE_URL}?symbol=USD/IDR,JPY/IDR&apikey=${API_KEY}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const json = await response.json();
+                if (Array.isArray(json)) {
+                    const rates = { IDR: 1, SGD: 12100 };
+                    json.forEach(quote => {
+                        if (quote.symbol === 'USD/IDR' && quote.close) {
+                            rates.USD = parseFloat(quote.close);
+                        }
+                        if (quote.symbol === 'JPY/IDR' && quote.close) {
+                            rates.JPY = parseFloat(quote.close);
+                        }
+                    });
+                    return rates;
+                }
+            }
+        }
+    } catch (err) {
+        console.warn('[TwelveData] Exchange rates fetch failed');
     }
+    return { IDR: 1, USD: 16800, JPY: 108, SGD: 12100 };
 };
 
 export const fetchStockPrice = async (ticker) => {
-    const now = Date.now();
-    if (CACHE.stocks[ticker] && (now - CACHE.stocks[ticker].timestamp < CACHE_DURATION)) {
-        return CACHE.stocks[ticker].data;
-    }
-
     try {
-        const price = await fetchYahooPrice(ticker);
-        CACHE.stocks[ticker] = { data: price, timestamp: now };
-        return price;
-    } catch (error) {
-        console.warn(`Failed to fetch stock ${ticker}, using mock`, error);
-        // Fallback mocks
-        const MOCK_PRICES = {
-            "BBCA.JK": 10200,
-            "BBRI.JK": 5400,
-            "BMRI.JK": 6800,
-            "TLKM.JK": 3200,
-            "ASII.JK": 5100,
-            "BUMI.JK": 422,
-            "JSMR.JK": 3410,
-            "AADI.JK": 7450,
-            "SRTG.JK": 1820,
-            "TUGU.JK": 1235
-        };
+        const quotes = await fetchBatchQuotes([ticker, ...DEFAULT_SYMBOLS]);
+        const price = quotes[ticker];
+        if (price !== undefined && price > 0) return price;
+        return MOCK_PRICES[ticker] || 0;
+    } catch (err) {
         return MOCK_PRICES[ticker] || 0;
     }
 };

@@ -11,6 +11,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/api/twelvedata': {
+        target: 'https://api.twelvedata.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/twelvedata/, ''),
+        secure: true,
+      },
       '/api/yahoo': {
         target: 'https://query1.finance.yahoo.com',
         changeOrigin: true,

@@ -4,6 +4,8 @@ import { fetchBitcoinPrice, fetchGoldPrice, fetchExchangeRates } from '../servic
 import { formatIDR } from '../utils/finance';
 
 const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
+    // console.log('AddAssetModal Render:', { isOpen });
+
     const [type, setType] = useState('stock');
     const [name, setName] = useState('');
     const [ticker, setTicker] = useState('');
@@ -17,25 +19,15 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
     const [fxRates, setFxRates] = useState({});
     const [marketLoading, setMarketLoading] = useState(false);
 
-    // Populate form when editing
-    useEffect(() => {
-        if (editingAsset) {
-            setType(editingAsset.type);
-            setName(editingAsset.name);
-            setTicker(editingAsset.ticker || '');
-            setShares(editingAsset.quantity.toString());
-            setPrice(editingAsset.manual_price_idr.toString());
-            setCurrency(editingAsset.currency || 'IDR');
-        } else {
-            resetForm();
-        }
-    }, [editingAsset]);
+    // --- Helper Functions (Hoisted to be available for effects) ---
 
-    useEffect(() => {
-        if (isOpen) {
-            loadMarketData();
-        }
-    }, [isOpen]);
+    const resetForm = () => {
+        setName('');
+        setTicker('');
+        setShares('');
+        setPrice('');
+        setCurrency('IDR');
+    };
 
     const loadMarketData = async () => {
         setMarketLoading(true);
@@ -53,10 +45,67 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
         }
     };
 
-    if (!isOpen) return null;
+    // --- Effects ---
+
+    // Populate form when editing
+    useEffect(() => {
+        if (!editingAsset) {
+            resetForm();
+            return;
+        }
+
+        try {
+            setType(editingAsset.type || 'stock');
+            setName(editingAsset.name || '');
+            setTicker(editingAsset.ticker || '');
+            setShares(editingAsset.quantity?.toString() || '0');
+            setPrice(editingAsset.manual_price_idr?.toString() || '0');
+            setCurrency(editingAsset.currency || 'IDR');
+        } catch (err) {
+            console.error("Error populating Edit Form:", err);
+            resetForm();
+        }
+    }, [editingAsset]);
+
+    useEffect(() => {
+        if (isOpen) {
+            loadMarketData();
+        }
+    }, [isOpen]);
+
+
 
     // --- Dynamic Constants based on Type ---
     const isAutoPriced = type === 'crypto' || type === 'gold' || type === 'cash';
+
+    // Fetch stock price when ticker changes
+    useEffect(() => {
+        if ((type === 'stock' || type === 'etf') && ticker && ticker.length > 3) {
+            const fetchPrice = async () => {
+                setMarketLoading(true);
+                try {
+                    const { fetchBatchQuotes } = await import('../services/marketData');
+                    const quotes = await fetchBatchQuotes([ticker]);
+                    const fetchedPrice = quotes[ticker];
+
+                    // Only update if we get a valid price > 0
+                    if (fetchedPrice && fetchedPrice > 0) {
+                        setPrice(fetchedPrice.toString());
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch stock price", err);
+                } finally {
+                    setMarketLoading(false);
+                }
+            };
+
+            // Debounce slightly
+            const timer = setTimeout(fetchPrice, 800);
+            return () => clearTimeout(timer);
+        }
+    }, [ticker, type]);
+
+    if (!isOpen) return null;
 
     const getLabels = () => {
         switch (type) {
@@ -91,7 +140,6 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
 
         let finalPrice = 0;
         if (type === 'crypto') finalPrice = btcPrice;
-        else if (type === 'gold') finalPrice = goldPrice;
         else if (type === 'cash') finalPrice = fxRates[currency] || 1;
         else finalPrice = parseFloat(price);
 
@@ -114,14 +162,6 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
 
         onClose();
         resetForm();
-    };
-
-    const resetForm = () => {
-        setName('');
-        setTicker('');
-        setShares('');
-        setPrice('');
-        setCurrency('IDR');
     };
 
     // --- Styles (SRD v3.0 Compliant) ---
@@ -269,14 +309,21 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
                                 <span style={{ fontSize: 11, opacity: 0.7 }}>Auto-updated</span>
                             </div>
                         ) : (
-                            <input
-                                type="number"
-                                placeholder="0"
-                                value={price}
-                                onChange={e => setPrice(e.target.value)}
-                                style={inputStyle}
-                                required
-                            />
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type="number"
+                                    placeholder="0"
+                                    value={price}
+                                    onChange={e => setPrice(e.target.value)}
+                                    style={inputStyle}
+                                    required
+                                />
+                                {marketLoading && (
+                                    <div style={{ position: 'absolute', right: 12, top: 12, fontSize: 11, color: 'var(--primary-purple)', fontWeight: 600 }}>
+                                        Fetching...
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
 
