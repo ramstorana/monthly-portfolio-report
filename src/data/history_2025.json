@@ -6,12 +6,12 @@
     "date": "2025-01-28T23:59:59.000Z",
     "assets": [
       {
-        "id": "2025-1-cash-td",
+        "id": "2025-1-cash-idr",
         "type": "cash",
-        "name": "Time Deposit",
-        "quantity": 1,
+        "name": "Cash IDR",
+        "quantity": 5,
         "currency": "IDR",
-        "manual_price_idr": 500000000
+        "manual_price_idr": 100000000
       },
       {
         "id": "2025-1-cash-jpy",
@@ -36,7 +36,7 @@
         "ticker": "BUMI.JK",
         "quantity": 1224400,
         "currency": "IDR",
-        "manual_price_idr": 107
+        "manual_price_idr": 155.347753
       },
       {
         "id": "2025-1-gold",
@@ -57,12 +57,12 @@
     "date": "2025-05-28T23:59:59.000Z",
     "assets": [
       {
-        "id": "2025-5-cash-td",
+        "id": "2025-5-cash-idr",
         "type": "cash",
-        "name": "Time Deposit",
-        "quantity": 1,
+        "name": "Cash IDR",
+        "quantity": 5,
         "currency": "IDR",
-        "manual_price_idr": 500000000
+        "manual_price_idr": 100000000
       },
       {
         "id": "2025-5-cash-jpy",
@@ -83,11 +83,11 @@
       {
         "id": "2025-5-crypto-btc",
         "type": "crypto",
-        "name": "Bitcoin",
+        "name": "Bitcoin (USD Val)",
         "ticker": "BTC",
-        "quantity": 0.006004,
-        "currency": "IDR",
-        "manual_price_idr": 16840000000
+        "quantity": 6004,
+        "currency": "USD",
+        "manual_price_idr": 16840
       },
       {
         "id": "2025-5-crypto-usdt",
@@ -95,7 +95,7 @@
         "name": "USDT",
         "ticker": "USDT",
         "quantity": 625,
-        "currency": "IDR",
+        "currency": "USD",
         "manual_price_idr": 16840
       },
       {
@@ -135,12 +135,12 @@
     "date": "2025-06-28T23:59:59.000Z",
     "assets": [
       {
-        "id": "2025-6-cash-td",
+        "id": "2025-6-cash-idr",
         "type": "cash",
-        "name": "Time Deposit",
-        "quantity": 1,
+        "name": "Cash IDR",
+        "quantity": 5,
         "currency": "IDR",
-        "manual_price_idr": 500000000
+        "manual_price_idr": 100000000
       },
       {
         "id": "2025-6-cash-jpy",
@@ -161,11 +161,11 @@
       {
         "id": "2025-6-crypto-btc",
         "type": "crypto",
-        "name": "Bitcoin",
+        "name": "Bitcoin (USD Val)",
         "ticker": "BTC",
-        "quantity": 0.008781,
-        "currency": "IDR",
-        "manual_price_idr": 16290000000
+        "quantity": 8781,
+        "currency": "USD",
+        "manual_price_idr": 16290
       },
       {
         "id": "2025-6-stock-bumi",
@@ -195,12 +195,12 @@
     "date": "2025-08-28T23:59:59.000Z",
     "assets": [
       {
-        "id": "2025-8-cash-td",
+        "id": "2025-8-cash-idr",
         "type": "cash",
-        "name": "Time Deposit",
-        "quantity": 1,
+        "name": "Cash IDR",
+        "quantity": 3,
         "currency": "IDR",
-        "manual_price_idr": 300000000
+        "manual_price_idr": 100000000
       },
       {
         "id": "2025-8-cash-usd",
@@ -272,6 +272,84 @@
     ],
     "isLocked": true,
     "totalNetWorth": 2044951960
+  },
+  {
+    "id": "2025-9",
+    "year": 2025,
+    "month": 9,
+    "date": "2025-09-28T23:59:59.000Z",
+    "assets": [
+      {
+        "id": "2025-9-cash-usd",
+        "type": "cash",
+        "name": "USD Savings",
+        "quantity": 7220,
+        "currency": "USD",
+        "manual_price_idr": 16605
+      },
+      {
+        "id": "2025-9-cash-sgd",
+        "type": "cash",
+        "name": "SGD Savings",
+        "quantity": 20000,
+        "currency": "SGD",
+        "manual_price_idr": 12781
+      },
+      {
+        "id": "2025-9-cash-jpy",
+        "type": "cash",
+        "name": "JPY Savings",
+        "quantity": 2163802,
+        "currency": "JPY",
+        "manual_price_idr": 108
+      },
+      {
+        "id": "2025-9-stock-bumi",
+        "type": "stock",
+        "name": "Bumi Resources",
+        "ticker": "BUMI.JK",
+        "quantity": 990700,
+        "currency": "IDR",
+        "manual_price_idr": 141
+      },
+      {
+        "id": "2025-9-stock-tugu",
+        "type": "stock",
+        "name": "Tugu Insurance",
+        "ticker": "TUGU.JK",
+        "quantity": 120000,
+        "currency": "IDR",
+        "manual_price_idr": 1045
+      },
+      {
+        "id": "2025-9-stock-bmri",
+        "type": "stock",
+        "name": "Bank Mandiri",
+        "ticker": "BMRI.JK",
+        "quantity": 17000,
+        "currency": "IDR",
+        "manual_price_idr": 4740
+      },
+      {
+        "id": "2025-9-stock-bbca",
+        "type": "stock",
+        "name": "BCA",
+        "ticker": "BBCA.JK",
+        "quantity": 8300,
+        "currency": "IDR",
+        "manual_price_idr": 8550
+      },
+      {
+        "id": "2025-9-gold",
+        "type": "gold",
+        "name": "Physical Gold",
+        "quantity": 575,
+        "currency": "IDR",
+        "manual_price_idr": 2305000
+      }
+    ],
+    "isLocked": true,
+    "totalNetWorth": 2351207416
   },
   {
     "id": "2025-10",
