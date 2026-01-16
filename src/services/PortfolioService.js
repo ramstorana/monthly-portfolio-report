@@ -45,11 +45,24 @@ export const PortfolioService = {
 
     getData() {
         const stored = localStorage.getItem(STORAGE_KEY);
+        let data = stored ? JSON.parse(stored) : INITIAL_STATE;
+
         if (!stored) {
             this.saveData(INITIAL_STATE);
-            return INITIAL_STATE;
         }
-        return JSON.parse(stored);
+
+        // --- HARD SYNC 2025 HISTORY ---
+        // Ensure 2025 data always comes from the JSON file (Source of Truth)
+        // This fixes the issue where LocalStorage has stale 2025 data
+        const storedSnapshots = data.snapshots || [];
+        const activeSnapshots = storedSnapshots.filter(s => s.year !== 2025);
+
+        // Merge: Imported 2025 History + Active/Other History
+        data.snapshots = [...HISTORY_2025, ...activeSnapshots].sort((a, b) => {
+            return new Date(a.date) - new Date(b.date);
+        });
+
+        return data;
     },
 
     saveData(data) {
