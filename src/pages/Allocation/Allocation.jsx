@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout/Layout';
 import { usePortfolio } from '../../hooks/usePortfolio';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { formatIDR } from '../../utils/finance';
 import { formatDateWIB, getWIBDate } from '../../utils/time';
 import styles from './Allocation.module.css';
 import AddAssetModal from '../../components/AddAssetModal';
-import { Plus, Trash2, Clock, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
+
+// Consistent category colors
+const CATEGORY_COLORS = {
+    gold: '#fdcb6e',      // Yellow
+    crypto: '#e17055',    // Orange
+    cash: '#00b894',      // Green (Mint)
+    stock: '#2ecc71',     // Green (Emerald)
+    etf: '#b2bec3',       // Silver
+    other: '#a29bfe'      // Purple fallback
+};
+
+const CATEGORY_LABELS = {
+    gold: '🥇 Commodity',
+    crypto: '₿ Crypto',
+    cash: '💵 Cash',
+    stock: '📈 Stocks',
+    etf: '📊 ETF'
+};
 
 const Allocation = () => {
     const { assets, totalNetWorth, addAsset, deleteAsset, updateAsset, loading } = usePortfolio();
-
-    console.log('Allocation Render:', { loading, assetsLength: assets?.length, totalNetWorth });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [timeLeft, setTimeLeft] = useState('');
@@ -42,25 +58,48 @@ const Allocation = () => {
         return () => clearInterval(timer);
     }, []);
 
-    // Group by Asset Class for the Pie Chart
-    const chartData = assets.reduce((acc, asset) => {
-        const typeLabel = (asset.type || 'other').toUpperCase();
-        const assetValue = parseFloat(asset.currentValue) || 0;
-        const existing = acc.find(item => item.name === typeLabel);
-        if (existing) {
-            existing.value += assetValue;
-        } else {
-            acc.push({ name: typeLabel, value: assetValue });
-        }
-        return acc;
-    }, []);
+    // Calculate category totals
+    const getCategoryTotals = () => {
+        const totals = { stock: 0, etf: 0, gold: 0, crypto: 0, cash: 0, other: 0 };
+        assets.forEach(asset => {
+            const type = asset.type || 'other';
+            const value = parseFloat(asset.currentValue) || 0;
+            if (totals[type] !== undefined) {
+                totals[type] += value;
+            } else {
+                totals.other += value;
+            }
+        });
+        return totals;
+    };
 
-    const COLORS = ['#6c5ce7', '#00b894', '#fdcb6e', '#ff7675', '#74b9ff'];
+    // Prepare chart data
+    const chartData = (() => {
+        const totals = getCategoryTotals();
+        return Object.entries(totals)
+            .filter(([_, value]) => value > 0)
+            .map(([key, value]) => ({
+                name: CATEGORY_LABELS[key] || key.toUpperCase(),
+                value,
+                color: CATEGORY_COLORS[key] || CATEGORY_COLORS.other,
+                percent: totalNetWorth ? ((value / totalNetWorth) * 100).toFixed(1) : 0,
+                key // keep key for internal use if needed
+            }));
+    })();
 
-    // Individual Stock Drill-down
-    const stockAssets = assets.filter(a => a.type === 'stock');
-    const totalStockValue = stockAssets.reduce((sum, a) => sum + (parseFloat(a.currentValue) || 0), 0);
-    const stockProportion = totalNetWorth > 0 ? (totalStockValue / totalNetWorth) * 100 : 0;
+    // Group assets by category for display
+    const getAssetsByCategory = () => {
+        const grouped = { stock: [], etf: [], gold: [], crypto: [], cash: [], other: [] };
+        assets.forEach(asset => {
+            const type = asset.type || 'other';
+            if (grouped[type]) {
+                grouped[type].push(asset);
+            } else {
+                grouped.other.push(asset);
+            }
+        });
+        return grouped;
+    };
 
     if (loading) {
         return (
@@ -87,6 +126,9 @@ const Allocation = () => {
             </Layout>
         );
     }
+
+    const groupedAssets = getAssetsByCategory();
+    const categoryOrder = ['stock', 'etf', 'gold', 'crypto', 'cash'];
 
     return (
         <Layout>
@@ -127,21 +169,20 @@ const Allocation = () => {
             </div>
 
             {/* Main Pie Chart */}
-            <div className={styles.chartContainer} style={{ padding: '24px 12px' }}>
-                <ResponsiveContainer width="100%" height={240}>
+            <div className={styles.chartContainer} style={{ padding: '24px 12px', minHeight: 320 }}>
+                <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
                         <Pie
                             data={chartData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={65}
+                            innerRadius={65} // Donut style
                             outerRadius={85}
-                            paddingAngle={8}
+                            paddingAngle={5}
                             dataKey="value"
-                            stroke="none"
                         >
                             {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                <Cell key={`cell-${index}`} fill={entry.color} stroke="var(--bg-main)" strokeWidth={2} />
                             ))}
                         </Pie>
                         <Tooltip
@@ -156,136 +197,155 @@ const Allocation = () => {
                             }}
                             itemStyle={{ color: '#2d3436', fontWeight: 600, fontSize: 13 }}
                         />
+                        <Legend
+                            verticalAlign="bottom"
+                            height={36}
+                            iconSize={10}
+                            iconType="circle"
+                            formatter={(value, entry) => (
+                                <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 500 }}>
+                                    {value} ({entry.payload.percent}%)
+                                </span>
+                            )}
+                        />
                     </PieChart>
                 </ResponsiveContainer>
                 <div style={{
                     textAlign: 'center',
                     fontSize: 12,
                     color: 'var(--text-secondary)',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    marginTop: -10
+                    marginTop: 10
                 }}>
                     Asset Distribution
                 </div>
             </div>
 
-            {/* Single Stock Detail Section */}
-            {stockAssets.length > 0 && (
-                <div className={styles.table} style={{ marginBottom: 24, padding: '24px 28px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--primary-purple)' }}>
-                            Single Stock Breakdown
-                        </h3>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', background: 'var(--bg-card-secondary)', padding: '4px 12px', borderRadius: 20 }}>
-                            {stockProportion.toFixed(1)}% of Portfolio
-                        </div>
-                    </div>
-                    {stockAssets.map((asset) => (
-                        <div key={asset.id} className={styles.row}>
-                            <div className={styles.rowLabel}>
-                                <div>
-                                    <div className={styles.assetType} style={{ fontWeight: 600 }}>{asset.name}</div>
-                                    <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{asset.ticker}</div>
-                                </div>
-                            </div>
-                            <div className={styles.rowValues}>
-                                <div className={styles.value} style={{ fontWeight: 600 }}>{formatIDR(asset.currentValue || 0)}</div>
-                                <div className={styles.percent} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                                    {totalNetWorth > 0 ? ((asset.currentValue / totalNetWorth) * 100).toFixed(2) : '0.00'}%
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
-                                <button
-                                    onClick={() => {
-                                        setEditingAsset(asset);
-                                        setIsModalOpen(true);
-                                    }}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: 'var(--primary-purple)',
-                                        cursor: 'pointer',
-                                        padding: 4,
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <Edit2 size={16} />
-                                </button>
-                                <button
-                                    onClick={() => deleteAsset(asset.id)}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: '#ff7675',
-                                        cursor: 'pointer',
-                                        padding: 4,
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* Categorized Asset Lists */}
+            {categoryOrder.map(cat => {
+                const catAssets = groupedAssets[cat];
+                if (!catAssets || catAssets.length === 0) return null;
 
-            {/* All Assets List */}
-            <div className={styles.table} style={{ padding: '24px 28px' }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, color: 'var(--text-primary)' }}>
-                    All Digital & Physical Assets
-                </h3>
-                {assets.map((item) => (
-                    <div key={item.id} className={styles.row}>
-                        <div className={styles.rowLabel}>
-                            <span className={styles.assetType} style={{ fontWeight: 600 }}>{item.name}</span>
-                        </div>
-                        <div className={styles.rowValues}>
-                            <div className={styles.value} style={{ fontWeight: 600 }}>{formatIDR(item.currentValue || 0)}</div>
-                            <div className={styles.percent} style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                                {item.type.toUpperCase()}
+                const subtotal = catAssets.reduce((sum, a) => sum + (parseFloat(a.currentValue) || 0), 0);
+                const catPercent = totalNetWorth ? ((subtotal / totalNetWorth) * 100).toFixed(1) : '0.0';
+
+                return (
+                    <div key={cat} style={{ marginBottom: 24 }}>
+                        {/* Category Header */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: 12,
+                            padding: '12px 16px',
+                            backgroundColor: CATEGORY_COLORS[cat],
+                            borderRadius: 12,
+                            color: '#fff',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                        }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 700, fontSize: 13 }}>
+                                    {CATEGORY_LABELS[cat]}
+                                </span>
                             </div>
+                            <span style={{
+                                fontSize: 14,
+                                fontFamily: 'var(--font-mono)',
+                                fontWeight: 700
+                            }}>
+                                {formatIDR(subtotal)} ({catPercent}%)
+                            </span>
                         </div>
-                        <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
-                            <button
-                                onClick={() => {
-                                    setEditingAsset(item);
-                                    setIsModalOpen(true);
-                                }}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'var(--primary-purple)',
-                                    cursor: 'pointer',
-                                    padding: 4,
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <Edit2 size={14} />
-                            </button>
-                            <button
-                                onClick={() => deleteAsset(item.id)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#fab1a0',
-                                    cursor: 'pointer',
-                                    padding: 4,
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <Trash2 size={14} />
-                            </button>
+
+                        {/* Assets List */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {catAssets.map((asset) => {
+                                const assetVal = parseFloat(asset.currentValue) || 0;
+                                const assetPercent = totalNetWorth ? ((assetVal / totalNetWorth) * 100).toFixed(1) : '0.0';
+
+                                return (
+                                    <div key={asset.id} style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '1fr auto',
+                                        gap: 12,
+                                        padding: '12px 14px',
+                                        backgroundColor: 'var(--card-bg)',
+                                        borderRadius: 10,
+                                        border: '1px solid var(--border-color)'
+                                    }}>
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                {asset.name}
+                                                <span style={{
+                                                    fontSize: 11,
+                                                    fontWeight: 700,
+                                                    color: CATEGORY_COLORS[cat],
+                                                    backgroundColor: 'var(--bg-main)',
+                                                    padding: '2px 6px',
+                                                    borderRadius: 6,
+                                                    border: `1px solid ${CATEGORY_COLORS[cat]}40`
+                                                }}>
+                                                    {assetPercent}%
+                                                </span>
+                                                {asset.ticker && (
+                                                    <span style={{
+                                                        fontSize: 10,
+                                                        color: 'var(--text-secondary)',
+                                                        backgroundColor: 'var(--border-color)',
+                                                        padding: '2px 6px',
+                                                        borderRadius: 4
+                                                    }}>
+                                                        {asset.ticker}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
+                                                {asset.quantity} {asset.type === 'stock' ? 'shares' : asset.type === 'gold' ? 'grams' : ''}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <div style={{
+                                                textAlign: 'right',
+                                                fontFamily: 'var(--font-mono)',
+                                                fontSize: 13,
+                                                fontWeight: 600
+                                            }}>
+                                                {formatIDR(assetVal)}
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div style={{ display: 'flex', gap: 4 }}>
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingAsset(asset);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                    style={{
+                                                        background: 'none', border: 'none',
+                                                        color: 'var(--primary-purple)', cursor: 'pointer', padding: 4
+                                                    }}
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteAsset(asset.id)}
+                                                    style={{
+                                                        background: 'none', border: 'none',
+                                                        color: '#ff7675', cursor: 'pointer', padding: 4
+                                                    }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                ))}
-            </div>
+                );
+            })}
 
             <AddAssetModal
                 isOpen={isModalOpen}

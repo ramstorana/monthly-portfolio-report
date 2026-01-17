@@ -109,9 +109,9 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
         switch (type) {
             case 'stock': return { qty: 'Number of Shares', price: 'Price per Share (IDR)', name: 'Stock Name' };
             case 'etf': return { qty: 'Number of Shares', price: 'Price per Share (IDR)', name: 'ETF Name' };
-            case 'crypto': return { qty: 'Amount (BTC)', price: 'Current Price (IDR)', name: 'Label (e.g. Cold Wallet)' };
-            case 'gold': return { qty: 'Weight (Grams)', price: 'Price per Gram (IDR)', name: 'Label (e.g. Vault)' };
-            case 'cash': return { qty: 'Amount', price: 'Exchange Rate', name: 'Label (e.g. USD Savings)' };
+            case 'crypto': return { qty: 'Amount (BTC)', price: 'Current Price (IDR)', name: 'Label' };
+            case 'gold': return { qty: 'Weight (Grams)', price: 'Price per Gram (IDR)', name: 'Label' };
+            case 'cash': return { qty: 'Amount', price: 'Exchange Rate', name: 'Label' };
             default: return { qty: 'Quantity', price: 'Price', name: 'Name' };
         }
     };
@@ -222,8 +222,8 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
                             >
                                 <option value="stock">Stock</option>
                                 <option value="etf">ETF</option>
-                                <option value="crypto">Bitcoin</option>
-                                <option value="gold">Gold</option>
+                                <option value="crypto">Crypto</option>
+                                <option value="gold">Commodity</option>
                                 <option value="cash">Cash</option>
                             </select>
                             <div style={{ position: 'absolute', right: 14, top: 14, pointerEvents: 'none', fontSize: 10 }}>▼</div>
@@ -237,7 +237,7 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
                         <label style={labelStyle}>{labels.name}</label>
                         <input
                             type="text"
-                            placeholder={type === 'crypto' ? "e.g. Cold Wallet" : "e.g. Bank Central Asia"}
+                            placeholder={type === 'crypto' ? "Cold Wallet" : "Bank Central Asia"}
                             value={name}
                             onChange={e => setName(e.target.value)}
                             style={{ ...inputStyle, fontFamily: 'var(--font-sans)' }}
@@ -251,7 +251,7 @@ const AddAssetModal = ({ isOpen, onClose, onAdd, onUpdate, editingAsset }) => {
                             <label style={labelStyle}>Ticker (Optional)</label>
                             <input
                                 type="text"
-                                placeholder="e.g. BBCA.JK"
+                                placeholder="BBCA.JK"
                                 value={ticker}
                                 onChange={e => setTicker(e.target.value)}
                                 style={{ ...inputStyle, fontFamily: 'var(--font-sans)' }}

@@ -11,16 +11,18 @@ import { getMonthName } from '../../utils/time';
 const CATEGORY_COLORS = {
     gold: '#fdcb6e',      // Yellow
     crypto: '#e17055',    // Orange
-    cash: '#00b894',      // Green
-    stock: '#0984e3',     // Blue
+    cash: '#00b894',      // Green (Mint)
+    stock: '#2ecc71',     // Green (Emerald)
+    etf: '#b2bec3',       // Silver
     other: '#a29bfe'      // Purple fallback
 };
 
 const CATEGORY_LABELS = {
-    gold: '🥇 Gold',
+    gold: '🥇 Commodity',
     crypto: '₿ Crypto',
     cash: '💵 Cash',
-    stock: '📈 Stocks'
+    stock: '📈 Stocks',
+    etf: '📊 ETF'
 };
 
 const ProjectDetail = () => {
@@ -49,7 +51,7 @@ const ProjectDetail = () => {
 
     // Calculate category totals for a snapshot
     const getCategoryTotals = (assets) => {
-        const totals = { gold: 0, crypto: 0, cash: 0, stock: 0 };
+        const totals = { gold: 0, crypto: 0, cash: 0, stock: 0, etf: 0 };
         assets.forEach(asset => {
             const type = asset.type || 'other';
             const val = calculateAssetValue(asset);
@@ -71,6 +73,7 @@ const ProjectDetail = () => {
         if (asset.type === 'cash' && asset.currency !== 'IDR') {
             return qty * price;
         }
+        // Stock, ETF, Gold, manual cases
         return qty * price;
     };
 
@@ -86,18 +89,20 @@ const ProjectDetail = () => {
     // Pie chart data for modal
     const getPieData = (assets) => {
         const totals = getCategoryTotals(assets);
+        const totalValue = Object.values(totals).reduce((a, b) => a + b, 0);
         return Object.entries(totals)
             .filter(([_, value]) => value > 0)
             .map(([key, value]) => ({
                 name: CATEGORY_LABELS[key] || key.toUpperCase(),
                 value,
-                color: CATEGORY_COLORS[key] || CATEGORY_COLORS.other
+                color: CATEGORY_COLORS[key] || CATEGORY_COLORS.other,
+                percent: totalValue ? ((value / totalValue) * 100).toFixed(1) : 0
             }));
     };
 
     // Group assets by category for detail view
     const getAssetsByCategory = (assets) => {
-        const grouped = { gold: [], crypto: [], stock: [], cash: [] };
+        const grouped = { gold: [], crypto: [], stock: [], cash: [], etf: [] };
         assets.forEach(asset => {
             const type = asset.type || 'other';
             if (grouped[type]) {
@@ -114,7 +119,7 @@ const ProjectDetail = () => {
     const formatQuantity = (asset) => {
         if (asset.type === 'gold') return `${asset.quantity} grams`;
         if (asset.type === 'crypto') return `${asset.quantity} ${asset.ticker || 'coins'}`;
-        if (asset.type === 'stock') return `${Number(asset.quantity).toLocaleString()} shares`;
+        if (asset.type === 'stock' || asset.type === 'etf') return `${Number(asset.quantity).toLocaleString()} shares`;
         if (asset.type === 'cash') {
             if (asset.currency === 'IDR') return '';
             return `${Number(asset.quantity).toLocaleString()} ${asset.currency}`;
@@ -446,25 +451,31 @@ const ProjectDetail = () => {
                         </div>
 
                         {/* Pie Chart */}
-                        <div style={{ height: 220, marginBottom: 20 }}>
+                        <div style={{ height: 260, marginBottom: 24 }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
                                         data={getPieData(selectedMonth.assets)}
                                         cx="50%" cy="50%"
-                                        innerRadius={55} outerRadius={80}
-                                        paddingAngle={3} dataKey="value"
+                                        innerRadius={65} // Donut Style
+                                        outerRadius={85}
+                                        paddingAngle={5}
+                                        dataKey="value"
                                     >
                                         {getPieData(selectedMonth.assets).map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                            <Cell key={`cell-${index}`} fill={entry.color} stroke="var(--bg-main)" strokeWidth={2} />
                                         ))}
                                     </Pie>
                                     <Tooltip formatter={(val) => formatIDR(val)} />
                                     <Legend
                                         verticalAlign="bottom"
                                         height={36}
+                                        iconSize={10}
+                                        iconType="circle"
                                         formatter={(value, entry) => (
-                                            <span style={{ color: 'var(--text-primary)', fontSize: 11 }}>{value}</span>
+                                            <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 500 }}>
+                                                {value} ({entry.payload.percent}%)
+                                            </span>
                                         )}
                                     />
                                 </PieChart>
@@ -474,14 +485,14 @@ const ProjectDetail = () => {
                         {/* Category Sections */}
                         {(() => {
                             const grouped = getAssetsByCategory(selectedMonth.assets);
-                            const categoryOrder = ['gold', 'crypto', 'stock', 'cash'];
+                            const categoryOrder = ['stock', 'etf', 'gold', 'crypto', 'cash'];
 
                             return categoryOrder.map(cat => {
                                 const assets = grouped[cat];
                                 if (!assets || assets.length === 0) return null;
 
                                 const subtotal = assets.reduce((sum, a) => sum + a.calculatedValue, 0);
-                                const percent = ((subtotal / selectedMonth.totalNetWorth) * 100).toFixed(1);
+                                const catPercent = ((subtotal / selectedMonth.totalNetWorth) * 100).toFixed(1);
 
                                 return (
                                     <div key={cat} style={{ marginBottom: 24 }}>
@@ -492,70 +503,85 @@ const ProjectDetail = () => {
                                             alignItems: 'center',
                                             marginBottom: 12,
                                             padding: '12px 16px',
-                                            backgroundColor: CATEGORY_COLORS[cat], // Solid color
+                                            backgroundColor: CATEGORY_COLORS[cat],
                                             borderRadius: 12,
-                                            color: '#fff', // White text for contrast
+                                            color: '#fff',
                                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                             textShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                         }}>
-                                            <span style={{ fontWeight: 700, fontSize: 13 }}>
-                                                {CATEGORY_LABELS[cat]}
-                                            </span>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontWeight: 700, fontSize: 13 }}>
+                                                    {CATEGORY_LABELS[cat]}
+                                                </span>
+                                            </div>
                                             <span style={{
-                                                fontSize: 12,
+                                                fontSize: 14,
                                                 fontFamily: 'var(--font-mono)',
-                                                fontWeight: 600
+                                                fontWeight: 700
                                             }}>
-                                                {formatBillions(subtotal)} ({percent}%)
+                                                {formatBillions(subtotal)} ({catPercent}%)
                                             </span>
                                         </div>
 
                                         {/* Assets List */}
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                            {assets.map((asset, idx) => (
-                                                <div key={idx} style={{
-                                                    display: 'grid',
-                                                    gridTemplateColumns: '1fr auto',
-                                                    gap: 12,
-                                                    padding: '12px 14px',
-                                                    backgroundColor: 'var(--card-bg)',
-                                                    borderRadius: 10,
-                                                    border: '1px solid var(--border-color)'
-                                                }}>
-                                                    <div>
-                                                        <div style={{ fontSize: 13, fontWeight: 600 }}>
-                                                            {asset.name}
-                                                            {asset.ticker && (
-                                                                <span style={{
-                                                                    marginLeft: 8,
-                                                                    fontSize: 10,
-                                                                    color: 'var(--text-secondary)',
-                                                                    backgroundColor: 'var(--border-color)',
-                                                                    padding: '2px 6px',
-                                                                    borderRadius: 4
-                                                                }}>
-                                                                    {asset.ticker}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
-                                                            {formatQuantity(asset)}
-                                                            {asset.type !== 'cash' && asset.manual_price_idr > 1000 && (
-                                                                <span> × {formatIDR(asset.manual_price_idr)}</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{
-                                                        textAlign: 'right',
-                                                        fontFamily: 'var(--font-mono)',
-                                                        fontSize: 13,
-                                                        fontWeight: 600,
-                                                        alignSelf: 'center'
+                                            {assets.map((asset, idx) => {
+                                                const assetPercent = ((asset.calculatedValue / selectedMonth.totalNetWorth) * 100).toFixed(1);
+                                                return (
+                                                    <div key={idx} style={{
+                                                        display: 'grid',
+                                                        gridTemplateColumns: '1fr auto',
+                                                        gap: 12,
+                                                        padding: '12px 14px',
+                                                        backgroundColor: 'var(--card-bg)',
+                                                        borderRadius: 10,
+                                                        border: '1px solid var(--border-color)'
                                                     }}>
-                                                        {formatIDR(asset.calculatedValue)}
+                                                        <div>
+                                                            <div style={{ fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                {asset.name}
+                                                                <span style={{
+                                                                    fontSize: 11,
+                                                                    fontWeight: 700,
+                                                                    color: CATEGORY_COLORS[cat],
+                                                                    backgroundColor: 'var(--bg-main)',
+                                                                    padding: '2px 6px',
+                                                                    borderRadius: 6,
+                                                                    border: `1px solid ${CATEGORY_COLORS[cat]}40`
+                                                                }}>
+                                                                    {assetPercent}%
+                                                                </span>
+                                                                {asset.ticker && (
+                                                                    <span style={{
+                                                                        fontSize: 10,
+                                                                        color: 'var(--text-secondary)',
+                                                                        backgroundColor: 'var(--border-color)',
+                                                                        padding: '2px 6px',
+                                                                        borderRadius: 4
+                                                                    }}>
+                                                                        {asset.ticker}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
+                                                                {formatQuantity(asset)}
+                                                                {asset.type !== 'cash' && asset.manual_price_idr > 1000 && (
+                                                                    <span> × {formatIDR(asset.manual_price_idr)}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{
+                                                            textAlign: 'right',
+                                                            fontFamily: 'var(--font-mono)',
+                                                            fontSize: 13,
+                                                            fontWeight: 600,
+                                                            alignSelf: 'center'
+                                                        }}>
+                                                            {formatIDR(asset.calculatedValue)}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 );
